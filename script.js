@@ -1,80 +1,103 @@
+var scene;
+var renderer;
+var camera;
+var WIDTH;
+var HEIGHT;
+
 // setup the scene, camera, engine
 function createScene() {
-  var scene = new THREE.Scene();
+  scene = new THREE.Scene();
   var render_blur = false;
-  var _w = 500;
-  var _h = 500;
-  var camera = new THREE.PerspectiveCamera(45, _w / _h, 0.1, 1000);
+  WIDTH = window.innerWidth;
+  HEIGHT = window.innerHeight;
+  camera = new THREE.PerspectiveCamera(45, WIDTH / HEIGHT, 0.1, 1000);
   camera.position.z = 10;
   // do not forget to add antialiasing, cubes looks very bad without it
-  var renderer = new THREE.WebGLRenderer({
+  renderer = new THREE.WebGLRenderer({
     antialias: true
   });
   // renderer.setClearColor(new THREE.Color(0x111111, 1.0));
-  renderer.setSize(_w, _h);
+  renderer.setSize(WIDTH , HEIGHT);
   document.body.appendChild(renderer.domElement);
 
 }
 
 // creating holder for cubes
-var create
-var group = new THREE.Object3D();
-var geometry = new THREE.BoxGeometry(1, 1, 1);
-// setup material
-var colors = [0x20a0aa, 0xfead13, 0xed4039];
-var material = new THREE.MeshBasicMaterial({
-  color: 0xffffff,
-  vertexColors: THREE.FaceColors
-});
-for (var i = 0; i < geometry.faces.length; i++) {
-  geometry.faces[i].color.setHex(colors[Math.floor(i / 4)]);
+var SpaceShip = function () {
+  var cube = new THREE.BoxGeometry( 1, 1, 1 );
+  var material = new THREE.MeshBasicMaterial({
+    color: 0xff0000,
+    vertexColors: THREE.FaceColors
+  });
+  this.mesh = new THREE.Mesh(cube, material);
+}
+function createSpaceShip(){ 
+	spaceShip = new SpaceShip();
+	//spaceShip.mesh.scale.set(.25,.25,.25);
+	//spaceShip.mesh.position.y = -100;
+	scene.add(spaceShip.mesh);
 }
 
-var cubes = [];
-// positions of cubes
-var cubes_pos = [
-  [-1, 1, -1],
-  [-1, 1, 1],
-  [1, 1, 1],
-  [1, 1, -1],
-  [1, -1, -1],
-  [1, -1, 1],
-  [-1, -1, 1],
-  [-1, -1, -1]
-];
+var mousePos={x:0, y:0};
 
-// generating cubes
-for (var k = 0; k < cubes_pos.length; k++) {
-  var cube = new THREE.Mesh(geometry, material);
-  cube.position.x = cubes_pos[k][0];
-  cube.position.y = cubes_pos[k][1];
-  cube.position.z = cubes_pos[k][2];
+// now handle the mousemove event
 
-  cubes.push(cube);
-  group.add(cube);
+function handleMouseMove(event) {
+
+	// here we are converting the mouse position value received 
+	// to a normalized value varying between -1 and 1;
+	// this is the formula for the horizontal axis:
+	
+	var tx = -1 + (event.clientX / WIDTH)*2;
+
+	// for the vertical axis, we need to inverse the formula 
+	// because the 2D y-axis goes the opposite direction of the 3D y-axis
+	
+	var ty = 1 - (event.clientY / HEIGHT)*2;
+  console.log(tx, ty);
+	mousePos = {x:tx, y:ty};
+
 }
-// setting start rotation for cubes
 
-console.log(group);
-// adding cubes to scene
-scene.add(group);
-var canvas = document.querySelector('canvas');
-canvas.addEventListener("click", move, false);
+function updatePlane(){
 
-function move() {
-  for (var i = 0; i < group.children.length; i++) {
-    group.children[i].rotation.x += 0.062;
-    group.children[i].rotation.y += -0.078;
+	// let's move the spaceShip between -100 and 100 on the horizontal axis, 
+	// and between 25 and 175 on the vertical axis,
+	// depending on the mouse position which ranges between -1 and 1 on both axes;
+	// to achieve that we use a normalize function (see below)
+	
+	var targetX = mousePos.x;
+	var targetY = mousePos.y;
 
-  }
+	// update the spaceShip's position
+	spaceShip.mesh.position.y = targetY;
+	spaceShip.mesh.position.x = targetX;
+}
 
+function normalize(v,vmin,vmax,tmin, tmax){
 
+	var nv = Math.max(Math.min(v,vmax), vmin);
+	var dv = vmax-vmin;
+	var pc = (nv-vmin)/dv;
+	var dt = tmax-tmin;
+	var tv = tmin + (pc*dt);
+	return tv;
 
 }
 
 function render() {
+  updatePlane();
   renderer.render(scene, camera);
   requestAnimationFrame(render);
 }
 
-render();
+
+
+window.addEventListener('load', init, false);
+
+function init(event) {
+  document.addEventListener('mousemove', handleMouseMove, false);
+  createScene();
+  createSpaceShip();
+  render();
+}
