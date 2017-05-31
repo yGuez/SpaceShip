@@ -3,6 +3,7 @@ var renderer;
 var camera;
 var WIDTH;
 var HEIGHT;
+var spaceShip;
 
 // setup the scene, camera, engine
 function createScene() {
@@ -24,15 +25,28 @@ function createScene() {
 
 // creating holder for cubes
 var SpaceShip = function () {
-  var cube = new THREE.BoxGeometry( 1, 1, 1 );
+  var that = this;
+  this.mesh;
+  var loader = new THREE.JSONLoader();
+  loader.load('/models/spaceShip.json', function ( geometry, materials ) {
+		var material = new THREE.MultiMaterial(materials);
+    for (var i = 0; i < materials.length; i++) {
+        materials[i].shading = THREE.FlatShading;
+    }
+		that.mesh = new THREE.Mesh( geometry, material );
+	});
+  
+  /*var cube = new THREE.BoxGeometry( 1, 1, 1 );
   var material = new THREE.MeshBasicMaterial({
     color: 0xff0000,
-    vertexColors: THREE.FaceColors
+    vertexColors: THREE.FaceColors  
   });
-  this.mesh = new THREE.Mesh(cube, material);
+  this.mesh = new THREE.Mesh(cube, material);*/
 }
 function createSpaceShip(){ 
 	spaceShip = new SpaceShip();
+  console.log(spaceShip);
+  
 	//spaceShip.mesh.scale.set(.25,.25,.25);
 	//spaceShip.mesh.position.y = -100;
 	scene.add(spaceShip.mesh);
