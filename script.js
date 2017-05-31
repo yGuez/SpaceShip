@@ -38,6 +38,8 @@ function createSpaceShip(){
 	scene.add(spaceShip.mesh);
 }
 
+
+
 var mousePos={x:0, y:0};
 
 // now handle the mousemove event
@@ -54,35 +56,32 @@ function handleMouseMove(event) {
 	// because the 2D y-axis goes the opposite direction of the 3D y-axis
 	
 	var ty = 1 - (event.clientY / HEIGHT)*2;
-  console.log(tx, ty);
 	mousePos = {x:tx, y:ty};
 
 }
 
 function updatePlane(){
-
 	// let's move the spaceShip between -100 and 100 on the horizontal axis, 
 	// and between 25 and 175 on the vertical axis,
 	// depending on the mouse position which ranges between -1 and 1 on both axes;
-	// to achieve that we use a normalize function (see below)
-	
-	var targetX = mousePos.x;
-	var targetY = mousePos.y;
-
-	// update the spaceShip's position
-	spaceShip.mesh.position.y = targetY;
-	spaceShip.mesh.position.x = targetX;
+	// to achieve that we use a normalize function (see below)	
+	var targetX = normalize(mousePos.x,-1,1,-4, 4);
+	var targetY = normalize(mousePos.y,-1,1,-3, 3);
+	// Move the plane at each frame by adding a fraction of the remaining distance
+	spaceShip.mesh.position.y += (targetY - spaceShip.mesh.position.y)*0.1;
+	spaceShip.mesh.position.x += (targetX - spaceShip.mesh.position.x)*0.1;
+  // Rotate the plane proportionally to the remaining distance
+	spaceShip.mesh.rotation.z = (targetY-spaceShip.mesh.position.y)*0.1;
+	spaceShip.mesh.rotation.x = (spaceShip.mesh.position.y-targetY)*0.05;
 }
 
 function normalize(v,vmin,vmax,tmin, tmax){
-
 	var nv = Math.max(Math.min(v,vmax), vmin);
 	var dv = vmax-vmin;
 	var pc = (nv-vmin)/dv;
 	var dt = tmax-tmin;
 	var tv = tmin + (pc*dt);
 	return tv;
-
 }
 
 function render() {
@@ -95,7 +94,7 @@ function render() {
 
 window.addEventListener('load', init, false);
 
-function init(event) {
+function init() {
   document.addEventListener('mousemove', handleMouseMove, false);
   createScene();
   createSpaceShip();
