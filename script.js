@@ -4,6 +4,7 @@ var camera;
 var WIDTH;
 var HEIGHT;
 var spaceShip;
+var terrain;
 
 // setup the scene, camera, engine
 function createScene() {
@@ -19,8 +20,36 @@ function createScene() {
   });
   // renderer.setClearColor(new THREE.Color(0x111111, 1.0));
   renderer.setSize(WIDTH, HEIGHT);
+  renderer.shadowMapEnabled = true;
+  renderer.shadowMapSoft = true;
   document.body.appendChild(renderer.domElement);
 
+}
+
+function createLights() {
+  var hemisphereLight = new THREE.HemisphereLight(0xaaaaaa, 0x000000, .9)
+  var shadowLight = new THREE.PointLight(0x111111, 11);
+  shadowLight.position.set(1, 3, 3);
+  // Allow shadow casting 
+  shadowLight.castShadow = true;
+
+  // define the visible area of the projected shadow
+  shadowLight.shadowDarkness = 0.5;
+  shadowLight.shadowCameraVisible = true; // only for debugging
+  // these six values define the boundaries of the yellow box seen above
+  shadowLight.shadowCameraNear = 2;
+  shadowLight.shadowCameraFar = 5;
+  shadowLight.shadowCameraLeft = -0.5;
+  shadowLight.shadowCameraRight = 0.5;
+  shadowLight.shadowCameraTop = 0.5;
+  shadowLight.shadowCameraBottom = -0.5;
+
+  // define the resolution of the shadow; the higher the better, 
+  // but also the more expensive and less performant
+  shadowLight.shadow.mapSize.width = 2048;
+  shadowLight.shadow.mapSize.height = 2048;
+  scene.add(shadowLight);
+  scene.add(hemisphereLight);
 }
 
 // creating holder for cubes
@@ -29,28 +58,49 @@ var SpaceShip = function () {
   var loader = new THREE.JSONLoader();
   loader.load('/models/ovni.json', function (geometry) {
     var materials = [
-      new THREE.MeshBasicMaterial({
+      /*  new THREE.MeshBasicMaterial({
+          color: 0xd13a00,
+          vertexColors: THREE.FaceColors
+        }),
+        new THREE.MeshBasicMaterial({
+          color: 0x1d274c,
+          vertexColors: THREE.FaceColors
+        }),
+        new THREE.MeshBasicMaterial({
+          color: 0x1c494d,
+          vertexColors: THREE.FaceColors
+        }),
+        new THREE.MeshBasicMaterial({
+          color: 0xffb200,
+          vertexColors: THREE.FaceColors
+        }),
+        new THREE.MeshBasicMaterial({
+          color: 0xffb200,
+          vertexColors: THREE.FaceColors
+        })*/
+      new THREE.MeshPhongMaterial({
         color: 0xd13a00,
-        vertexColors: THREE.FaceColors
+        shading: THREE.FlatShading
       }),
-      new THREE.MeshBasicMaterial({
+      new THREE.MeshPhongMaterial({
         color: 0x1d274c,
-        vertexColors: THREE.FaceColors
+        shading: THREE.FlatShading
       }),
-      new THREE.MeshBasicMaterial({
+      new THREE.MeshPhongMaterial({
         color: 0x1c494d,
-        vertexColors: THREE.FaceColors
+        shading: THREE.FlatShading
       }),
-      new THREE.MeshBasicMaterial({
+      new THREE.MeshPhongMaterial({
         color: 0xffb200,
-        vertexColors: THREE.FaceColors
+        shading: THREE.FlatShading
       }),
-      new THREE.MeshBasicMaterial({
+      new THREE.MeshPhongMaterial({
         color: 0xffb200,
-        vertexColors: THREE.FaceColors
+        shading: THREE.FlatShading
       })
     ];
     that.mesh = new THREE.Mesh(geometry, materials);
+    that.mesh.castShadow = true;
     scene.add(that.mesh);
   });
 
@@ -58,9 +108,42 @@ var SpaceShip = function () {
 
 function createSpaceShip() {
   spaceShip = new SpaceShip();
-
 }
 
+////////////////////////////////////sea//////////////////////////
+Terrain = function () {
+  var geometry = new THREE.PlaneGeometry(20, 100, 12, 12);
+  // rotate the geometryetry on the x axis
+  geometry.applyMatrix(new THREE.Matrix4().makeRotationX(-Math.PI / 2));
+
+  var matTerrain = new THREE.MeshPhongMaterial({
+    color: 0xffb200,
+    shading: THREE.FlatShading
+  });
+  // important: by merging vertices we ensure the continuity of the waves
+  geometry.mergeVertices();
+
+  // get the vertices
+  var l = geometry.vertices.length;
+
+  // create an array to store new data associated to each vertex
+  this.waves = [];
+
+  for (var i = 0; i < l; i++) {
+    // get each vertex
+    var v = geometry.vertices[i];
+    v.y = Math.random() * (.2 - .1 + 1) + .1;
+  }
+  this.mesh = new THREE.Mesh(geometry, matTerrain);
+  this.mesh.receiveShadow = true;
+}
+
+
+function createTerrain() {
+  terrain = new Terrain();
+  terrain.mesh.position.y = -3;
+  scene.add(terrain.mesh);
+}
 var mousePos = {
   x: 0,
   y: 0
@@ -103,6 +186,8 @@ function updatePlane() {
     spaceShip.mesh.rotation.z = (targetY - spaceShip.mesh.position.y) * 0.1;
     spaceShip.mesh.rotation.x = (spaceShip.mesh.position.y - targetY) * 0.05;
   }, 100);
+
+
 }
 
 function normalize(v, vmin, vmax, tmin, tmax) {
@@ -127,6 +212,8 @@ window.addEventListener('load', init, false);
 function init() {
   document.addEventListener('mousemove', handleMouseMove, false);
   createScene();
+  createLights();
   createSpaceShip();
+  createTerrain();
   render();
 }
