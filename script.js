@@ -5,6 +5,7 @@ var WIDTH;
 var HEIGHT;
 var spaceShip;
 var terrain;
+var terrain2;
 
 // setup the scene, camera, engine
 function createScene() {
@@ -115,9 +116,9 @@ Terrain = function () {
   var geometry = new THREE.PlaneGeometry(20, 100, 12, 12);
   // rotate the geometryetry on the x axis
   geometry.applyMatrix(new THREE.Matrix4().makeRotationX(-Math.PI / 2));
-
+  var _this = this
   var matTerrain = new THREE.MeshPhongMaterial({
-    color: 0xffb200,
+    color: _this.color,
     shading: THREE.FlatShading
   });
   // important: by merging vertices we ensure the continuity of the waves
@@ -141,8 +142,20 @@ Terrain = function () {
 
 function createTerrain() {
   terrain = new Terrain();
+  terrain.color = 0x1d274c;
   terrain.mesh.position.y = -3;
+ 
   scene.add(terrain.mesh);
+  console.log(terrain);
+}
+function createTerrain2() {
+  terrain2 = new Terrain();
+  terrain2.color = 0x1c494d;
+  terrain2.mesh.position.y = -3;
+  terrain2.mesh.position.z = -50;
+ 
+  scene.add(terrain2.mesh);
+  console.log(terrain2.color);
 }
 var mousePos = {
   x: 0,
@@ -200,6 +213,12 @@ function normalize(v, vmin, vmax, tmin, tmax) {
 }
 
 function render() {
+  terrain.mesh.position.z += 0.2;
+  terrain2.mesh.position.z += 0.2;
+  /*if(terrain.mesh.position.z >= 100){
+    terrain.mesh.position.z = 0;
+  }*/
+  
   updatePlane();
   renderer.render(scene, camera);
   requestAnimationFrame(render);
@@ -215,5 +234,6 @@ function init() {
   createLights();
   createSpaceShip();
   createTerrain();
+  createTerrain2();
   render();
 }
