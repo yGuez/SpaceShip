@@ -21,29 +21,27 @@ function createScene() {
   });
   // renderer.setClearColor(new THREE.Color(0x111111, 1.0));
   renderer.setSize(WIDTH, HEIGHT);
-  renderer.shadowMapEnabled = true;
-  renderer.shadowMapSoft = true;
+  renderer.shadowMap.enabled= true;
   document.body.appendChild(renderer.domElement);
 
 }
 
 function createLights() {
   var hemisphereLight = new THREE.HemisphereLight(0xaaaaaa, 0x000000, .9)
-  var shadowLight = new THREE.PointLight(0x111111, 11);
+  var shadowLight = new THREE.PointLight(0x111111, 30);
   shadowLight.position.set(1, 3, 3);
   // Allow shadow casting 
   shadowLight.castShadow = true;
 
   // define the visible area of the projected shadow
-  shadowLight.shadowDarkness = 0.5;
-  shadowLight.shadowCameraVisible = true; // only for debugging
+   // only for debugging
   // these six values define the boundaries of the yellow box seen above
-  shadowLight.shadowCameraNear = 2;
-  shadowLight.shadowCameraFar = 5;
-  shadowLight.shadowCameraLeft = -0.5;
-  shadowLight.shadowCameraRight = 0.5;
-  shadowLight.shadowCameraTop = 0.5;
-  shadowLight.shadowCameraBottom = -0.5;
+  shadowLight.shadow.camera.near = 2;
+  shadowLight.shadow.camera.far = 5;
+  shadowLight.shadow.camera.left = -0.5;
+  shadowLight.shadow.camera.right = 0.5;
+  shadowLight.shadow.camera.top = 0.5;
+  shadowLight.shadow.camera.bottom = -0.5;
 
   // define the resolution of the shadow; the higher the better, 
   // but also the more expensive and less performant
@@ -117,10 +115,8 @@ Terrain = function () {
   // rotate the geometryetry on the x axis
   geometry.applyMatrix(new THREE.Matrix4().makeRotationX(-Math.PI / 2));
   var _this = this
-  var matTerrain = new THREE.MeshPhongMaterial({
-    color: _this.color,
-    shading: THREE.FlatShading
-  });
+  this.color = Math.random()
+  this.mat ;
   // important: by merging vertices we ensure the continuity of the waves
   geometry.mergeVertices();
 
@@ -135,25 +131,34 @@ Terrain = function () {
     var v = geometry.vertices[i];
     v.y = Math.random() * (.2 - .1 + 1) + .1;
   }
-  this.mesh = new THREE.Mesh(geometry, matTerrain);
+  this.mesh = new THREE.Mesh(geometry, this.mat);
   this.mesh.receiveShadow = true;
 }
 
 
 function createTerrain() {
   terrain = new Terrain();
-  terrain.color = 0x1d274c;
+ 
   terrain.mesh.position.y = -3;
+  terrain.mat = new THREE.MeshPhongMaterial({
+    color: 0x1d274c,
+    shading: THREE.FlatShading
+  });
  
   scene.add(terrain.mesh);
+  
   console.log(terrain);
+  
 }
 function createTerrain2() {
   terrain2 = new Terrain();
-  terrain2.color = 0x1c494d;
+
   terrain2.mesh.position.y = -3;
-  terrain2.mesh.position.z = -50;
- 
+  terrain2.mesh.position.z = -100;
+ terrain.mat = new THREE.MeshPhongMaterial({
+    color: 0xffb200,
+    shading: THREE.FlatShading
+  });
   scene.add(terrain2.mesh);
   console.log(terrain2.color);
 }
