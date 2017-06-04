@@ -115,8 +115,11 @@ Terrain = function () {
   // rotate the geometryetry on the x axis
   geometry.applyMatrix(new THREE.Matrix4().makeRotationX(-Math.PI / 2));
   var _this = this
-  this.color = Math.random()
-  this.mat ;
+  this.color = Math.random();
+  this.mat = new THREE.MeshPhongMaterial({
+    color: 0xffb200,
+    shading: THREE.FlatShading
+  });
   // important: by merging vertices we ensure the continuity of the waves
   geometry.mergeVertices();
 
@@ -140,10 +143,6 @@ function createTerrain() {
   terrain = new Terrain();
  
   terrain.mesh.position.y = -3;
-  terrain.mat = new THREE.MeshPhongMaterial({
-    color: 0x1d274c,
-    shading: THREE.FlatShading
-  });
  
   scene.add(terrain.mesh);
   
@@ -155,10 +154,7 @@ function createTerrain2() {
 
   terrain2.mesh.position.y = -3;
   terrain2.mesh.position.z = -100;
- terrain.mat = new THREE.MeshPhongMaterial({
-    color: 0xffb200,
-    shading: THREE.FlatShading
-  });
+ 
   scene.add(terrain2.mesh);
   console.log(terrain2.color);
 }
