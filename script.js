@@ -6,6 +6,7 @@ var HEIGHT;
 var spaceShip;
 var terrain;
 var terrain2;
+var tunel;
 
 // setup the scene, camera, engine
 function createScene() {
@@ -15,14 +16,17 @@ function createScene() {
   HEIGHT = window.innerHeight;
   camera = new THREE.PerspectiveCamera(45, WIDTH / HEIGHT, 0.1, 1000);
   camera.position.z = 10;
+  scene.fog = new THREE.Fog(0xf7d9aa, 1, 400);
   // do not forget to add antialiasing, cubes looks very bad without it
   renderer = new THREE.WebGLRenderer({
+    alpha: true,
     antialias: true
   });
   // renderer.setClearColor(new THREE.Color(0x111111, 1.0));
   renderer.setSize(WIDTH, HEIGHT);
-  renderer.shadowMap.enabled= true;
-  document.body.appendChild(renderer.domElement);
+  renderer.shadowMap.enabled = true;
+  container = document.getElementById('world');
+  container.appendChild(renderer.domElement);
 
 }
 
@@ -34,7 +38,7 @@ function createLights() {
   shadowLight.castShadow = true;
 
   // define the visible area of the projected shadow
-   // only for debugging
+  // only for debugging
   // these six values define the boundaries of the yellow box seen above
   shadowLight.shadow.camera.near = 2;
   shadowLight.shadow.camera.far = 5;
@@ -114,6 +118,7 @@ Terrain = function () {
   var geometry = new THREE.PlaneGeometry(20, 100, 12, 12);
   // rotate the geometryetry on the x axis
   geometry.applyMatrix(new THREE.Matrix4().makeRotationX(-Math.PI / 2));
+
   var _this = this
   this.color = Math.random();
   this.mat = new THREE.MeshPhongMaterial({
@@ -141,23 +146,92 @@ Terrain = function () {
 
 function createTerrain() {
   terrain = new Terrain();
- 
+
   terrain.mesh.position.y = -3;
- 
+
   scene.add(terrain.mesh);
-  
+
   console.log(terrain);
-  
+
 }
 function createTerrain2() {
   terrain2 = new Terrain();
 
   terrain2.mesh.position.y = -3;
   terrain2.mesh.position.z = -100;
- 
+
   scene.add(terrain2.mesh);
   console.log(terrain2.color);
+
+
 }
+///////////////////////////tunel//////////////////////////////////
+Tunnel = function () {
+  // Empty array to store the points along the path
+  var points = [];
+
+  // Define points along Z axis to create a curve
+  for (var i = 0; i < 5; i += 1) {
+    points.push(new THREE.Vector3(0, 0, -2 * (i / 4)));
+    console.log(points);
+  }
+  
+  // Set custom Y position for the last point
+  points[2].y = -0.2;
+
+  // Create a curve based on the points
+  this.curve = new THREE.CatmullRomCurve3(points);
+  // Define the curve type
+
+  // Empty geometry
+  var geometry = new THREE.Geometry();
+  // Create vertices based on the curve
+  geometry.vertices = this.curve.getPoints(70);
+  // Create a line from the points with a basic line material
+  this.splineMesh = new THREE.Line(geometry, new THREE.LineBasicMaterial());
+
+  // Create a material for the tunnel with a custom texture
+  // Set side to BackSide since the camera is inside the tunnel
+  var texture = new THREE.TextureLoader();
+  var map = texture.load("/images/peint.jpg");
+  this.tubeMaterial = new THREE.MeshStandardMaterial({
+    side: THREE.BackSide,
+    map: map
+  });
+
+  
+  this.tubeMaterial.map.wrapS = THREE.RepeatWrapping;
+  this.tubeMaterial.map.wrapT = THREE.RepeatWrapping;
+  this.tubeMaterial.map.repeat.set(30, 6);
+  
+
+  // Create a tube geometry based on the curve
+  this.tubeGeometry = new THREE.TubeGeometry(this.curve, 70, 0.02, 50, false);
+  // Create a mesh based on the tube geometry and its material
+  this.tubeMesh = new THREE.Mesh(this.tubeGeometry, this.tubeMaterial);
+  // Push the tube into the scene
+ 
+  // Clone the original tube geometry
+  // Because we will modify the visible one but we need to keep track of the original position of the vertices
+  this.tubeGeometry_o = this.tubeGeometry.clone();
+};
+
+Tunnel.prototype.updateMaterialOffset = function() {
+  // Update the offset of the material
+  this.tubeMaterial.map.offset.x += 0.008;
+  this.tubeMaterial.map.offset.y += -0.005;
+  this.tubeMaterial.map.offset.z += -0.002;
+};
+
+
+function createTunel(){
+  tunel = new Tunnel();
+ 
+  scene.add(tunel.tubeMesh);
+  tunel.tubeMesh.scale.set(500,500,500);
+  console.log(tunel.tubeMesh);
+}
+/////////mouse///////////////////////////////////////////////
 var mousePos = {
   x: 0,
   y: 0
@@ -214,12 +288,12 @@ function normalize(v, vmin, vmax, tmin, tmax) {
 }
 
 function render() {
-  terrain.mesh.position.z += 0.2;
-  terrain2.mesh.position.z += 0.2;
-  /*if(terrain.mesh.position.z >= 100){
-    terrain.mesh.position.z = 0;
-  }*/
-  
+  // terrain.mesh.position.z += 0.2;
+  // terrain2.mesh.position.z += 0.2;
+  // if(terrain.mesh.position.z >= 25){
+  //   terrain.mesh.position.z = 0;
+  // }
+  tunel.updateMaterialOffset();
   updatePlane();
   renderer.render(scene, camera);
   requestAnimationFrame(render);
@@ -234,7 +308,8 @@ function init() {
   createScene();
   createLights();
   createSpaceShip();
-  createTerrain();
-  createTerrain2();
+  // createTerrain();
+  // createTerrain2();
+  createTunel();
   render();
 }
