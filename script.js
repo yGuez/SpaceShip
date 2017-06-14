@@ -16,7 +16,7 @@ function createScene() {
   HEIGHT = window.innerHeight;
   camera = new THREE.PerspectiveCamera(45, WIDTH / HEIGHT, 0.1, 1000);
   camera.position.z = 10;
-  scene.fog = new THREE.Fog(0xf7d9aa, 1, 400);
+  scene.fog = new THREE.Fog(0x152841, 1, 400);
   // do not forget to add antialiasing, cubes looks very bad without it
   renderer = new THREE.WebGLRenderer({
     alpha: true,
@@ -24,7 +24,7 @@ function createScene() {
   });
   // renderer.setClearColor(new THREE.Color(0x111111, 1.0));
   renderer.setSize(WIDTH, HEIGHT);
-  renderer.shadowMap.enabled = true;
+  // renderer.shadowMap.enabled = true;
   container = document.getElementById('world');
   container.appendChild(renderer.domElement);
 
@@ -61,7 +61,7 @@ var SpaceShip = function () {
   var loader = new THREE.JSONLoader();
   loader.load('/models/ovni.json', function (geometry) {
     var materials = [
-      /*  new THREE.MeshBasicMaterial({
+        new THREE.MeshBasicMaterial({
           color: 0xd13a00,
           vertexColors: THREE.FaceColors
         }),
@@ -80,8 +80,8 @@ var SpaceShip = function () {
         new THREE.MeshBasicMaterial({
           color: 0xffb200,
           vertexColors: THREE.FaceColors
-        })*/
-      new THREE.MeshPhongMaterial({
+        })
+     /* new THREE.MeshPhongMaterial({
         color: 0xd13a00,
         shading: THREE.FlatShading
       }),
@@ -100,7 +100,7 @@ var SpaceShip = function () {
       new THREE.MeshPhongMaterial({
         color: 0xffb200,
         shading: THREE.FlatShading
-      })
+      })*/
     ];
     that.mesh = new THREE.Mesh(geometry, materials);
     that.mesh.castShadow = true;
@@ -193,7 +193,7 @@ Tunnel = function () {
   // Create a material for the tunnel with a custom texture
   // Set side to BackSide since the camera is inside the tunnel
   var texture = new THREE.TextureLoader();
-  var map = texture.load("/images/peint.jpg");
+  var map = texture.load("/images/etoiles.jpg");
   this.tubeMaterial = new THREE.MeshStandardMaterial({
     side: THREE.BackSide,
     map: map
@@ -223,7 +223,25 @@ Tunnel.prototype.updateMaterialOffset = function() {
   this.tubeMaterial.map.offset.z += -0.002;
 };
 
+Particules = function() {
+  var geometry = new THREE.TorusGeometry( 10, 3, 16, 100 );
+  var matParti =  new THREE.MeshBasicMaterial({
+          color: 0xffb200,
+          vertexColors: THREE.FaceColors
+        })
+  this.mesh = new THREE.Mesh( geometry, matParti );
+}
 
+Particules.prototype.move = function(){
+  this.mesh.position.z += 0.5;
+}
+
+function createParticules() {
+  torus =  new Particules();
+  scene.add(torus.mesh);
+  torus.mesh.position.z = -300;
+  torus.mesh.scale.set(0.5,0.5,0.5);
+}
 function createTunel(){
   tunel = new Tunnel();
  
@@ -294,6 +312,7 @@ function render() {
   //   terrain.mesh.position.z = 0;
   // }
   tunel.updateMaterialOffset();
+  torus.move();
   updatePlane();
   renderer.render(scene, camera);
   requestAnimationFrame(render);
@@ -308,6 +327,7 @@ function init() {
   createScene();
   createLights();
   createSpaceShip();
+  createParticules();
   // createTerrain();
   // createTerrain2();
   createTunel();
