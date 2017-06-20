@@ -7,6 +7,10 @@ var spaceShip;
 var terrain;
 var terrain2;
 var tunel;
+var counter = 0;
+var tangent = new THREE.Vector3();
+var axis = new THREE.Vector3();
+var up = new THREE.Vector3(0, 1, 0);
 
 // setup the scene, camera, engine
 function createScene() {
@@ -61,46 +65,46 @@ var SpaceShip = function () {
   var loader = new THREE.JSONLoader();
   loader.load('/models/ovni.json', function (geometry) {
     var materials = [
-        new THREE.MeshBasicMaterial({
-          color: 0xd13a00,
-          vertexColors: THREE.FaceColors
-        }),
-        new THREE.MeshBasicMaterial({
-          color: 0x1d274c,
-          vertexColors: THREE.FaceColors
-        }),
-        new THREE.MeshBasicMaterial({
-          color: 0x1c494d,
-          vertexColors: THREE.FaceColors
-        }),
-        new THREE.MeshBasicMaterial({
-          color: 0xffb200,
-          vertexColors: THREE.FaceColors
-        }),
-        new THREE.MeshBasicMaterial({
-          color: 0xffb200,
-          vertexColors: THREE.FaceColors
-        })
-     /* new THREE.MeshPhongMaterial({
+      new THREE.MeshBasicMaterial({
         color: 0xd13a00,
-        shading: THREE.FlatShading
+        vertexColors: THREE.FaceColors
       }),
-      new THREE.MeshPhongMaterial({
+      new THREE.MeshBasicMaterial({
         color: 0x1d274c,
-        shading: THREE.FlatShading
+        vertexColors: THREE.FaceColors
       }),
-      new THREE.MeshPhongMaterial({
+      new THREE.MeshBasicMaterial({
         color: 0x1c494d,
-        shading: THREE.FlatShading
+        vertexColors: THREE.FaceColors
       }),
-      new THREE.MeshPhongMaterial({
+      new THREE.MeshBasicMaterial({
         color: 0xffb200,
-        shading: THREE.FlatShading
+        vertexColors: THREE.FaceColors
       }),
-      new THREE.MeshPhongMaterial({
+      new THREE.MeshBasicMaterial({
         color: 0xffb200,
-        shading: THREE.FlatShading
-      })*/
+        vertexColors: THREE.FaceColors
+      })
+      /* new THREE.MeshPhongMaterial({
+         color: 0xd13a00,
+         shading: THREE.FlatShading
+       }),
+       new THREE.MeshPhongMaterial({
+         color: 0x1d274c,
+         shading: THREE.FlatShading
+       }),
+       new THREE.MeshPhongMaterial({
+         color: 0x1c494d,
+         shading: THREE.FlatShading
+       }),
+       new THREE.MeshPhongMaterial({
+         color: 0xffb200,
+         shading: THREE.FlatShading
+       }),
+       new THREE.MeshPhongMaterial({
+         color: 0xffb200,
+         shading: THREE.FlatShading
+       })*/
     ];
     that.mesh = new THREE.Mesh(geometry, materials);
     that.mesh.castShadow = true;
@@ -154,6 +158,7 @@ function createTerrain() {
   console.log(terrain);
 
 }
+
 function createTerrain2() {
   terrain2 = new Terrain();
 
@@ -168,25 +173,25 @@ function createTerrain2() {
 ///////////////////////////tunel//////////////////////////////////
 Tunnel = function () {
   // Empty array to store the points along the path
-  var points = [];
+  points = [];
 
   // Define points along Z axis to create a curve
   for (var i = 0; i < 5; i += 1) {
     points.push(new THREE.Vector3(0, 0, -2 * (i / 4)));
     console.log(points);
   }
-  
+
   // Set custom Y position for the last point
   points[2].y = -0.2;
 
   // Create a curve based on the points
-  this.curve = new THREE.CatmullRomCurve3(points);
+  curve = new THREE.CatmullRomCurve3(points);
   // Define the curve type
 
   // Empty geometry
   var geometry = new THREE.Geometry();
   // Create vertices based on the curve
-  geometry.vertices = this.curve.getPoints(70);
+  geometry.vertices = curve.getPoints(70);
   // Create a line from the points with a basic line material
   this.splineMesh = new THREE.Line(geometry, new THREE.LineBasicMaterial());
 
@@ -199,54 +204,80 @@ Tunnel = function () {
     map: map
   });
 
-  
+
   this.tubeMaterial.map.wrapS = THREE.RepeatWrapping;
   this.tubeMaterial.map.wrapT = THREE.RepeatWrapping;
   this.tubeMaterial.map.repeat.set(30, 6);
-  
+
 
   // Create a tube geometry based on the curve
-  this.tubeGeometry = new THREE.TubeGeometry(this.curve, 70, 0.02, 50, false);
+  this.tubeGeometry = new THREE.TubeGeometry(curve, 70, 0.02, 50, false);
   // Create a mesh based on the tube geometry and its material
   this.tubeMesh = new THREE.Mesh(this.tubeGeometry, this.tubeMaterial);
   // Push the tube into the scene
- 
+
   // Clone the original tube geometry
   // Because we will modify the visible one but we need to keep track of the original position of the vertices
   this.tubeGeometry_o = this.tubeGeometry.clone();
 };
 
-Tunnel.prototype.updateMaterialOffset = function() {
+Tunnel.prototype.updateMaterialOffset = function () {
   // Update the offset of the material
   this.tubeMaterial.map.offset.x += 0.008;
   this.tubeMaterial.map.offset.y += -0.005;
   this.tubeMaterial.map.offset.z += -0.002;
 };
 
-Particules = function() {
-  var geometry = new THREE.TorusGeometry( 10, 3, 16, 100 );
-  var matParti =  new THREE.MeshBasicMaterial({
-          color: 0xffb200,
-          vertexColors: THREE.FaceColors
-        })
-  this.mesh = new THREE.Mesh( geometry, matParti );
+Particules = function () {
+  var geometry = new THREE.TorusGeometry(10, 3, 16, 100);
+  var matParti = new THREE.MeshBasicMaterial({
+    color: 0xffb200,
+    vertexColors: THREE.FaceColors
+  })
+  this.mesh = new THREE.Mesh(geometry, matParti);
 }
+var tunel2 = new Tunnel();
+var spline = new THREE.SplineCurve3([
+  new THREE.Vector3(0, 0, 0),
+  new THREE.Vector3(0, 200, 0),
+  new THREE.Vector3(150, 150, 0),
+  new THREE.Vector3(150, 50, 0),
+  new THREE.Vector3(250, 150, 0),
+  new THREE.Vector3(250, 300, 0)
+]);
+console.log('spline', spline);
+Particules.prototype.move = function () {
 
-Particules.prototype.move = function(){
-  this.mesh.position.z += 0.5;
+  if (counter <= 1) {
+    pt = spline.getPoint(counter);
+    this.mesh.position.set(pt.x, pt.y, pt.z);
+
+    tangent = spline.getTangentAt(counter).normalize();
+
+    axis.crossVectors(up, tangent).normalize();
+
+    var radians = Math.acos(up.dot(tangent));
+
+    this.mesh.quaternion.setFromAxisAngle(axis, radians);
+
+    counter += 0.000005
+  } else {
+    counter = 0;
+  }
 }
 
 function createParticules() {
-  torus =  new Particules();
+  torus = new Particules();
   scene.add(torus.mesh);
-  torus.mesh.position.z = -300;
-  torus.mesh.scale.set(0.5,0.5,0.5);
+  // torus.mesh.position.z = -300;
+  torus.mesh.scale.set(0.5, 0.5, 0.5);
 }
-function createTunel(){
+
+function createTunel() {
   tunel = new Tunnel();
- 
+
   scene.add(tunel.tubeMesh);
-  tunel.tubeMesh.scale.set(500,500,500);
+  tunel.tubeMesh.scale.set(500, 500, 500);
   console.log(tunel.tubeMesh);
 }
 /////////mouse///////////////////////////////////////////////
@@ -275,22 +306,51 @@ function handleMouseMove(event) {
   };
 
 }
+var socket = io.connect('http://localhost:8080');
+socket.on('message', function (message) {
+  console.log('Le serveur a un message pour vous : ' + message);
+})
+ var mouve = {
+  x: 0,
+  y: 0
+};
+
+function mouveCon() {
+ 
+  socket.on('coordo', function (coordo) {  
+      var x = 1+ coordo.mouveX;
+      var y = 1+ coordo.mouveY;
+      mouve = {
+        x: x,
+        y: y
+      }
+      console.log('cordo', mouve.y);  
+    });
+console.log('targetX', mouve.x);
+}
+
 
 function updatePlane() {
   // ajout d'un timeOut sinon ça ne marche pas le modèle est pas chargé !
+
   setTimeout(function () {
-    // let's move the spaceShip between -100 and 100 on the horizontal axis, 
-    // and between 25 and 175 on the vertical axis,
-    // depending on the mouse position which ranges between -1 and 1 on both axes;
-    // to achieve that we use a normalize function (see below)	
-    var targetX = normalize(mousePos.x, -1, 1, -4, 4);
-    var targetY = normalize(mousePos.y, -1, 1, -3, 3);
-    // Move the plane at each frame by adding a fraction of the remaining distance
-    spaceShip.mesh.position.y += (targetY - spaceShip.mesh.position.y) * 0.1;
-    spaceShip.mesh.position.x += (targetX - spaceShip.mesh.position.x) * 0.1;
-    // Rotate the plane proportionally to the remaining distance
-    spaceShip.mesh.rotation.z = (targetY - spaceShip.mesh.position.y) * 0.1;
-    spaceShip.mesh.rotation.x = (spaceShip.mesh.position.y - targetY) * 0.05;
+    
+     // let's move the spaceShip between -100 and 100 on the horizontal axis, 
+     // and between 25 and 175 on the vertical axis,
+     // depending on the mouse position which ranges between -1 and 1 on both axes;
+     // to achieve that we use a normalize function (see below)	
+     /*var targetX = normalize(mousePos.x, -1, 1, -4, 4);
+     var targetY = normalize(mousePos.y, -1, 1, -3, 3);*/
+     console.log('update', parseFloat(mouve.x));
+     var targetX = normalize(mouve.x, -1, 1, -4, 4);
+     var targetY = normalize(mouve.y, -1, 1, -3, 3);
+     
+     // Move the plane at each frame by adding a fraction of the remaining distance
+     spaceShip.mesh.position.y += (targetY - spaceShip.mesh.position.y) * 0.1;
+     spaceShip.mesh.position.x += (targetX - spaceShip.mesh.position.x) * 0.1;
+     // Rotate the plane proportionally to the remaining distance
+     spaceShip.mesh.rotation.z = (targetY - spaceShip.mesh.position.y) * 0.1;
+     spaceShip.mesh.rotation.x = (spaceShip.mesh.position.y - targetY) * 0.05;
   }, 100);
 
 
@@ -324,6 +384,7 @@ window.addEventListener('load', init, false);
 
 function init() {
   document.addEventListener('mousemove', handleMouseMove, false);
+  mouveCon();
   createScene();
   createLights();
   createSpaceShip();

@@ -1,0 +1,9 @@
+{
+    "name": "space-ship",
+    "version": "0.1.0",
+    "dependencies": {
+        "socket.io": "~1.2.1"
+    },
+    "author": "yGuez",
+    "description": "Game about SpaceShips !"
+}
