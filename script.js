@@ -306,7 +306,7 @@ function handleMouseMove(event) {
   };
 
 }
-var socket = io.connect('http://localhost:8080');
+var socket = io.connect('http://192.168.0.29:48080');
 socket.on('message', function (message) {
   console.log('Le serveur a un message pour vous : ' + message);
 })
@@ -318,12 +318,15 @@ socket.on('message', function (message) {
 function mouveCon() {
  
   socket.on('coordo', function (coordo) {  
-      var x = 1+ coordo.mouveX;
-      var y = 1+ coordo.mouveY;
+       x = 1+ coordo.mouveX;
+       y = 1+ coordo.mouveY;
       mouve = {
         x: x,
         y: y
+
       }
+    //   spaceShip.mesh.position.y += (mouve.x - spaceShip.mesh.position.y) * 0.1;
+    //  spaceShip.mesh.position.x += (mouve.y - spaceShip.mesh.position.x) * 0.1;
       console.log('cordo', mouve.y);  
     });
 console.log('targetX', mouve.x);
@@ -335,15 +338,17 @@ function updatePlane() {
 
   setTimeout(function () {
     
+    
      // let's move the spaceShip between -100 and 100 on the horizontal axis, 
      // and between 25 and 175 on the vertical axis,
      // depending on the mouse position which ranges between -1 and 1 on both axes;
      // to achieve that we use a normalize function (see below)	
      /*var targetX = normalize(mousePos.x, -1, 1, -4, 4);
      var targetY = normalize(mousePos.y, -1, 1, -3, 3);*/
-     console.log('update', parseFloat(mouve.x));
-     var targetX = normalize(mouve.x, -1, 1, -4, 4);
-     var targetY = normalize(mouve.y, -1, 1, -3, 3);
+     console.log('update', mouve.y);
+     console.log('update', mouve.x);
+     var targetX = mouve.x /100;
+     var targetY = mouve.y /100;
      
      // Move the plane at each frame by adding a fraction of the remaining distance
      spaceShip.mesh.position.y += (targetY - spaceShip.mesh.position.y) * 0.1;
@@ -351,7 +356,10 @@ function updatePlane() {
      // Rotate the plane proportionally to the remaining distance
      spaceShip.mesh.rotation.z = (targetY - spaceShip.mesh.position.y) * 0.1;
      spaceShip.mesh.rotation.x = (spaceShip.mesh.position.y - targetY) * 0.05;
+     console.log(spaceShip.mesh.position);
   }, 100);
+      
+
 
 
 }
