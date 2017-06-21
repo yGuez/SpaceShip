@@ -110,6 +110,7 @@ var SpaceShip = function () {
     that.mesh.castShadow = true;
     scene.add(that.mesh);
     that.mesh.position.z = -10;
+    // that.mesh.scale.set(0.1,0.1,0.1);
   });
 
 }
@@ -177,8 +178,8 @@ Tunnel = function () {
   points = [];
 
   // Define points along Z axis to create a curve
-  for (var i = 0; i < 5; i += 1) {
-    points.push(new THREE.Vector3(0, 0, -500 * (i / 4)));
+  for (var i = 0; i < 3; i += 1) {
+    points.push(new THREE.Vector3(0, 0, -500 * (i / 2)));
     console.log(points);
   }
 
@@ -232,33 +233,67 @@ Tunnel.prototype.updateMaterialOffset = function () {
 
 Particules = function () {
   var geometry = new THREE.TorusGeometry(10, 3, 16, 100);
-  var matParti = new THREE.MeshBasicMaterial({
+  var sphere = new THREE.SphereGeometry(0.5,5, 5);
+  var matYellow = new THREE.MeshBasicMaterial({
     color: 0xffb200,
     vertexColors: THREE.FaceColors
   })
-  this.mesh = new THREE.Mesh(geometry, matParti);
-  // this.mesh.position.set(0,0,1.5);
-  // this.offset = new THREE.Vector3((Math.random()-0.5)*0.025, (Math.random()-0.5)*0.025, 0);
+  var matOrange = new THREE.MeshBasicMaterial({
+    color: 0xff8c00,
+    vertexColors: THREE.FaceColors
+  })
+  this.mesh = new THREE.Mesh(geometry, matYellow);
+   this.group = new THREE.Group();
+  for ( var j = 0; j < 100; j ++ ) {
+    this.sphereMesh = new THREE.Mesh(sphere, matOrange);
+    /*this.sphereMesh.position.x = Math.random() * 2000 - 1000;
+    this.sphereMesh.position.y = Math.random() * 2000 - 1000;
+    this.sphereMesh.position.z = Math.random() * 2000 - 1000;
+
+    this.sphereMesh.rotation.x = Math.random() * 360 * ( Math.PI / 180 );
+    this.sphereMesh.rotation.y = Math.random() * 360 * ( Math.PI / 180 );*/
+    this.group.add(this.sphereMesh );
+  }
+
+ 
+  this.group.add(this.mesh);
+  this.posY =  [];
+  this.posX =  [];
+  this.posZ = [];
+  this.offset = new THREE.Vector3((Math.random()-0.5)*0.025, (Math.random()-0.5)*0.025, 0);
+  for (var i = 0; i < this.group.children.length; i++) {
+     this.posY.push(this.group.children[i].position.y = Math.random() * 12 - 12);
+     this.posX.push(this.group.children[i].position.x = Math.random() * 12 - 12);
+    // this.posZ.push(this.group.children[i].position.z = Math.random() * 500 - 1);
+    
+  }
 }
 
 Particules.prototype.move = function () {
   /*if (counter <= 1) {*/
-    var pt = curve.getPoint(1 - (counter%1));
-    this.mesh.position.set(pt.x, pt.y, pt.z);
+    
+      
+    for (var i = 0; i < this.group.children.length; i++) {
+      var pt = curve.getPoint(1 - (counter += 0.01)%1);
+     this.group.children[i].position.set(pt.x + this.posX[i], pt.y + this.posY[i], pt.z);   
+  } 
+    
+    
     // tangent = curve.getTangentAt(counter).normalize();
     // axis.crossVectors(up, tangent).normalize();
     // var radians = Math.acos(up.dot(tangent));
     // this.mesh.quaternion.setFromAxisAngle(axis, radians);
-    counter += 0.001;
-    console.log(this.mesh.position);
+    // counter += 0.001;
+
   /*} else {
     counter = 0;
   }*/
+  
 }
 
 function createParticules() {
   torus = new Particules();
-  scene.add(torus.mesh);
+  scene.add(torus.group);
   // torus.mesh.position.z = -300;
   torus.mesh.scale.set(0.1, 0.1, 0.1);
 }
