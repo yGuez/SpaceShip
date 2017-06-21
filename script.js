@@ -19,7 +19,7 @@ function createScene() {
   WIDTH = window.innerWidth;
   HEIGHT = window.innerHeight;
   camera = new THREE.PerspectiveCamera(45, WIDTH / HEIGHT, 0.1, 1000);
-  camera.position.z = 10;
+  camera.position.z = 0.25;
   scene.fog = new THREE.Fog(0x152841, 1, 400);
   // do not forget to add antialiasing, cubes looks very bad without it
   renderer = new THREE.WebGLRenderer({
@@ -109,6 +109,7 @@ var SpaceShip = function () {
     that.mesh = new THREE.Mesh(geometry, materials);
     that.mesh.castShadow = true;
     scene.add(that.mesh);
+    that.mesh.position.z = -10;
   });
 
 }
@@ -177,12 +178,12 @@ Tunnel = function () {
 
   // Define points along Z axis to create a curve
   for (var i = 0; i < 5; i += 1) {
-    points.push(new THREE.Vector3(0, 0, -2 * (i / 4)));
+    points.push(new THREE.Vector3(0, 0, -500 * (i / 4)));
     console.log(points);
   }
 
   // Set custom Y position for the last point
-  points[2].y = -0.2;
+  points[2].y = -60;
 
   // Create a curve based on the points
   curve = new THREE.CatmullRomCurve3(points);
@@ -211,10 +212,11 @@ Tunnel = function () {
 
 
   // Create a tube geometry based on the curve
-  this.tubeGeometry = new THREE.TubeGeometry(curve, 70, 0.02, 50, false);
+  this.tubeGeometry = new THREE.TubeGeometry(curve, 70, 9, 50, false);
   // Create a mesh based on the tube geometry and its material
   this.tubeMesh = new THREE.Mesh(this.tubeGeometry, this.tubeMaterial);
   // Push the tube into the scene
+  console.log('tubepositio', this.tubeGeometry);
 
   // Clone the original tube geometry
   // Because we will modify the visible one but we need to keep track of the original position of the vertices
@@ -235,49 +237,36 @@ Particules = function () {
     vertexColors: THREE.FaceColors
   })
   this.mesh = new THREE.Mesh(geometry, matParti);
+  // this.mesh.position.set(0,0,1.5);
+  // this.offset = new THREE.Vector3((Math.random()-0.5)*0.025, (Math.random()-0.5)*0.025, 0);
 }
-var tunel2 = new Tunnel();
-var spline = new THREE.SplineCurve3([
-  new THREE.Vector3(0, 0, 0),
-  new THREE.Vector3(0, 200, 0),
-  new THREE.Vector3(150, 150, 0),
-  new THREE.Vector3(150, 50, 0),
-  new THREE.Vector3(250, 150, 0),
-  new THREE.Vector3(250, 300, 0)
-]);
-console.log('spline', spline);
+
 Particules.prototype.move = function () {
-
-  if (counter <= 1) {
-    pt = spline.getPoint(counter);
+  /*if (counter <= 1) {*/
+    var pt = curve.getPoint(1 - (counter%1));
     this.mesh.position.set(pt.x, pt.y, pt.z);
-
-    tangent = spline.getTangentAt(counter).normalize();
-
-    axis.crossVectors(up, tangent).normalize();
-
-    var radians = Math.acos(up.dot(tangent));
-
-    this.mesh.quaternion.setFromAxisAngle(axis, radians);
-
-    counter += 0.000005
-  } else {
+    // tangent = curve.getTangentAt(counter).normalize();
+    // axis.crossVectors(up, tangent).normalize();
+    // var radians = Math.acos(up.dot(tangent));
+    // this.mesh.quaternion.setFromAxisAngle(axis, radians);
+    counter += 0.001;
+    console.log(this.mesh.position);
+  /*} else {
     counter = 0;
-  }
+  }*/
 }
 
 function createParticules() {
   torus = new Particules();
   scene.add(torus.mesh);
   // torus.mesh.position.z = -300;
-  torus.mesh.scale.set(0.5, 0.5, 0.5);
+  torus.mesh.scale.set(0.1, 0.1, 0.1);
 }
 
 function createTunel() {
   tunel = new Tunnel();
-
   scene.add(tunel.tubeMesh);
-  tunel.tubeMesh.scale.set(500, 500, 500);
+  //tunel.tubeMesh.scale.set(500, 500, 500);
   console.log(tunel.tubeMesh);
 }
 /////////mouse///////////////////////////////////////////////
@@ -306,61 +295,47 @@ function handleMouseMove(event) {
   };
 
 }
-var socket = io.connect('http://192.168.0.29:48080');
+var socket = io.connect('http://172.26.2.185:48080');
 socket.on('message', function (message) {
   console.log('Le serveur a un message pour vous : ' + message);
 })
- var mouve = {
+var mouve = {
   x: 0,
   y: 0
 };
 
 function mouveCon() {
- 
-  socket.on('coordo', function (coordo) {  
-       x = 1+ coordo.mouveX;
-       y = 1+ coordo.mouveY;
-      mouve = {
-        x: x,
-        y: y
 
-      }
-    //   spaceShip.mesh.position.y += (mouve.x - spaceShip.mesh.position.y) * 0.1;
-    //  spaceShip.mesh.position.x += (mouve.y - spaceShip.mesh.position.x) * 0.1;
-      console.log('cordo', mouve.y);  
-    });
-console.log('targetX', mouve.x);
+  socket.on('coordo', function (coordo) {
+    x = 1 + coordo.mouveX;
+    y = 1 + coordo.mouveY;
+    mouve = {
+      x: x,
+      y: y
+    }
+  });
 }
 
 
 function updatePlane() {
   // ajout d'un timeOut sinon ça ne marche pas le modèle est pas chargé !
-
   setTimeout(function () {
-    
-    
-     // let's move the spaceShip between -100 and 100 on the horizontal axis, 
-     // and between 25 and 175 on the vertical axis,
-     // depending on the mouse position which ranges between -1 and 1 on both axes;
-     // to achieve that we use a normalize function (see below)	
-     /*var targetX = normalize(mousePos.x, -1, 1, -4, 4);
-     var targetY = normalize(mousePos.y, -1, 1, -3, 3);*/
-     console.log('update', mouve.y);
-     console.log('update', mouve.x);
-     var targetX = mouve.x /100;
-     var targetY = mouve.y /100;
-     
-     // Move the plane at each frame by adding a fraction of the remaining distance
-     spaceShip.mesh.position.y += (targetY - spaceShip.mesh.position.y) * 0.1;
-     spaceShip.mesh.position.x += (targetX - spaceShip.mesh.position.x) * 0.1;
-     // Rotate the plane proportionally to the remaining distance
-     spaceShip.mesh.rotation.z = (targetY - spaceShip.mesh.position.y) * 0.1;
-     spaceShip.mesh.rotation.x = (spaceShip.mesh.position.y - targetY) * 0.05;
-     console.log(spaceShip.mesh.position);
+    // let's move the spaceShip between -100 and 100 on the horizontal axis, 
+    // and between 25 and 175 on the vertical axis,
+    // depending on the mouse position which ranges between -1 and 1 on both axes;
+    // to achieve that we use a normalize function (see below)	
+    /*var targetX = normalize(mousePos.x, -1, 1, -4, 4);
+    var targetY = normalize(mousePos.y, -1, 1, -3, 3);*/
+    var targetX = mouve.x / 100;
+    var targetY = mouve.y / 100;
+
+    // Move the plane at each frame by adding a fraction of the remaining distance
+    spaceShip.mesh.position.y += (targetY - spaceShip.mesh.position.y) * 0.1;
+    spaceShip.mesh.position.x += (targetX - spaceShip.mesh.position.x) * 0.1;
+    // Rotate the plane proportionally to the remaining distance
+    spaceShip.mesh.rotation.z = (targetY - spaceShip.mesh.position.y) * 0.1;
+    spaceShip.mesh.rotation.x = (spaceShip.mesh.position.y - targetY) * 0.05;
   }, 100);
-      
-
-
 
 }
 
@@ -374,19 +349,12 @@ function normalize(v, vmin, vmax, tmin, tmax) {
 }
 
 function render() {
-  // terrain.mesh.position.z += 0.2;
-  // terrain2.mesh.position.z += 0.2;
-  // if(terrain.mesh.position.z >= 25){
-  //   terrain.mesh.position.z = 0;
-  // }
   tunel.updateMaterialOffset();
   torus.move();
   updatePlane();
   renderer.render(scene, camera);
   requestAnimationFrame(render);
 }
-
-
 
 window.addEventListener('load', init, false);
 
@@ -397,8 +365,6 @@ function init() {
   createLights();
   createSpaceShip();
   createParticules();
-  // createTerrain();
-  // createTerrain2();
   createTunel();
   render();
 }
