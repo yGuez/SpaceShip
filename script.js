@@ -262,9 +262,9 @@ Particules = function () {
   this.posZ = [];
   this.offset = new THREE.Vector3((Math.random()-0.5)*0.025, (Math.random()-0.5)*0.025, 0);
   for (var i = 0; i < this.group.children.length; i++) {
-     this.posY.push(this.group.children[i].position.y = Math.random() * 12 - 12);
-     this.posX.push(this.group.children[i].position.x = Math.random() * 12 - 12);
-    // this.posZ.push(this.group.children[i].position.z = Math.random() * 500 - 1);
+     this.posY.push(this.group.children[i].position.y = Math.random() < 0.5 ? -6 : 6);
+     this.posX.push(this.group.children[i].position.x = Math.random() < 0.5 ? -6 : 6);
+     this.posZ.push( Math.random() * 1 - 0);
     
   }
 }
@@ -274,7 +274,7 @@ Particules.prototype.move = function () {
     
       
     for (var i = 0; i < this.group.children.length; i++) {
-      var pt = curve.getPoint(1 - (counter += 0.01)%1);
+      var pt = curve.getPoint(1 - (counter + this.posZ[i])%1);
      this.group.children[i].position.set(pt.x + this.posX[i], pt.y + this.posY[i], pt.z);   
   } 
     
@@ -283,7 +283,7 @@ Particules.prototype.move = function () {
     // axis.crossVectors(up, tangent).normalize();
     // var radians = Math.acos(up.dot(tangent));
     // this.mesh.quaternion.setFromAxisAngle(axis, radians);
-    // counter += 0.001;
+    counter += 0.001;
 
   /*} else {
     counter = 0;
@@ -330,7 +330,7 @@ function handleMouseMove(event) {
   };
 
 }
-var socket = io.connect('http://172.26.2.185:48080');
+var socket = io.connect('http://192.168.0.29:48080');
 socket.on('message', function (message) {
   console.log('Le serveur a un message pour vous : ' + message);
 })
