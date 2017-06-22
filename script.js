@@ -3,7 +3,7 @@ var renderer;
 var camera;
 var WIDTH;
 var HEIGHT;
-var spaceShip;
+var spaceShip = {};
 var terrain;
 var terrain2;
 var tunel;
@@ -11,6 +11,10 @@ var counter = 0;
 var tangent = new THREE.Vector3();
 var axis = new THREE.Vector3();
 var up = new THREE.Vector3(0, 1, 0);
+
+function getRandom(min, max) {
+  return Math.random() * (max - min) + min;
+}
 
 // setup the scene, camera, engine
 function createScene() {
@@ -117,6 +121,7 @@ var SpaceShip = function () {
 
 function createSpaceShip() {
   spaceShip = new SpaceShip();
+  
 }
 
 ////////////////////////////////////sea//////////////////////////
@@ -233,7 +238,7 @@ Tunnel.prototype.updateMaterialOffset = function () {
 
 Particules = function () {
   var geometry = new THREE.TorusGeometry(10, 3, 16, 100);
-  var sphere = new THREE.SphereGeometry(0.5,5, 5);
+  var sphere = new THREE.SphereGeometry(0.5, 5, 5);
   var matYellow = new THREE.MeshBasicMaterial({
     color: 0xffb200,
     vertexColors: THREE.FaceColors
@@ -243,8 +248,8 @@ Particules = function () {
     vertexColors: THREE.FaceColors
   })
   this.mesh = new THREE.Mesh(geometry, matYellow);
-   this.group = new THREE.Group();
-  for ( var j = 0; j < 100; j ++ ) {
+  this.group = new THREE.Group();
+  for (var j = 0; j < 100; j++) {
     this.sphereMesh = new THREE.Mesh(sphere, matOrange);
     /*this.sphereMesh.position.x = Math.random() * 2000 - 1000;
     this.sphereMesh.position.y = Math.random() * 2000 - 1000;
@@ -252,44 +257,46 @@ Particules = function () {
 
     this.sphereMesh.rotation.x = Math.random() * 360 * ( Math.PI / 180 );
     this.sphereMesh.rotation.y = Math.random() * 360 * ( Math.PI / 180 );*/
-    this.group.add(this.sphereMesh );
+    this.group.add(this.sphereMesh);
   }
 
- 
+
   this.group.add(this.mesh);
-  this.posY =  [];
-  this.posX =  [];
+  this.posY = [];
+  this.posX = [];
   this.posZ = [];
-  this.offset = new THREE.Vector3((Math.random()-0.5)*0.025, (Math.random()-0.5)*0.025, 0);
+  this.offset = new THREE.Vector3((Math.random() - 0.5) * 0.025, (Math.random() - 0.5) * 0.025, 0);
   for (var i = 0; i < this.group.children.length; i++) {
-     this.posY.push(this.group.children[i].position.y = Math.random() < 0.5 ? -6 : 6);
-     this.posX.push(this.group.children[i].position.x = Math.random() < 0.5 ? -6 : 6);
-     this.posZ.push( Math.random() * 1 - 0);
-    
+    this.posY.push(this.group.children[i].position.y = getRandom(-6, 6));
+    this.posX.push(this.group.children[i].position.x = getRandom(-6, 6));
+    this.posZ.push(Math.random() * 1 - 0);
   }
 }
 
 Particules.prototype.move = function () {
-  /*if (counter <= 1) {*/
-    
-      
-    for (var i = 0; i < this.group.children.length; i++) {
-      var pt = curve.getPoint(1 - (counter + this.posZ[i])%1);
-     this.group.children[i].position.set(pt.x + this.posX[i], pt.y + this.posY[i], pt.z);   
-  } 
-    
-    
-    // tangent = curve.getTangentAt(counter).normalize();
-    // axis.crossVectors(up, tangent).normalize();
-    // var radians = Math.acos(up.dot(tangent));
-    // this.mesh.quaternion.setFromAxisAngle(axis, radians);
-    counter += 0.001;
+  for (var i = 0; i < this.group.children.length; i++) {
+    var pt = curve.getPoint(1 - (counter + this.posZ[i]) % 1);
+    this.group.children[i].position.set(pt.x + this.posX[i], pt.y + this.posY[i], pt.z);
+  }
+  counter += 0.0003;
 
-  /*} else {
-    counter = 0;
-  }*/
-  
 }
+Particules.prototype.collision = function (collider) {
+  var concatPos = collider.position.x + collider.position.y + collider.position.z;
+  var colliderMesh = Math.round(concatPos * 100)/100;
+  for (var i = 0; i < this.group.children.length; i++) {
+    var concat = this.group.children[i].position.x + this.group.children[i].position.y + this.group.children[i].position.z;
+    var partiCol = Math.round(concat * 100)/100;
+    // var ray =  new THREE.Ray(this.group.children[i].position, new THREE.Vector3(this.group.children[i].position.x, this.group.children[i].position.y, collider.position.z).normalize());
+   if(collider.position.distanceTo(this.group.children[i].position) <= 1){
+      debugger;
+    console.log('collision');
+  }
+ 
+  }
+}
+
+
 
 function createParticules() {
   torus = new Particules();
@@ -330,7 +337,7 @@ function handleMouseMove(event) {
   };
 
 }
-var socket = io.connect('http://192.168.0.29:48080');
+var socket = io.connect('http://172.26.2.185:48080');
 socket.on('message', function (message) {
   console.log('Le serveur a un message pour vous : ' + message);
 })
@@ -340,7 +347,6 @@ var mouve = {
 };
 
 function mouveCon() {
-
   socket.on('coordo', function (coordo) {
     x = 1 + coordo.mouveX;
     y = 1 + coordo.mouveY;
@@ -370,6 +376,9 @@ function updatePlane() {
     // Rotate the plane proportionally to the remaining distance
     spaceShip.mesh.rotation.z = (targetY - spaceShip.mesh.position.y) * 0.1;
     spaceShip.mesh.rotation.x = (spaceShip.mesh.position.y - targetY) * 0.05;
+   /* var concat = spaceShip.mesh.position.x + spaceShip.mesh.position.y + spaceShip.mesh.position.z;
+    console.log('po', Math.round(concat));*/
+    torus.collision(spaceShip.mesh);
   }, 100);
 
 }
@@ -386,6 +395,7 @@ function normalize(v, vmin, vmax, tmin, tmax) {
 function render() {
   tunel.updateMaterialOffset();
   torus.move();
+  
   updatePlane();
   renderer.render(scene, camera);
   requestAnimationFrame(render);
