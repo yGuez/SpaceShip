@@ -47,7 +47,7 @@ Particules.prototype.move = function () {
     counter += 0.0003;
 }
 
-Particules.prototype.collision = function (collider, explosion) {
+Particules.prototype.collision = function (collider, x, y, z) {
     var concatPos = collider.position.x + collider.position.y + collider.position.z;
     var colliderMesh = Math.round(concatPos * 100) / 100;
     for (var i = 0; i < this.group.children.length; i++) {
@@ -57,6 +57,9 @@ Particules.prototype.collision = function (collider, explosion) {
             //  this.group.children[i].material.color.setHex(0xf600ff);
             // this.group.children[i].material.color.setHex(0xf600ff);
             this.group.children[i].visible = false;
+            var explosion = new Explosion();
+            scene.add(explosion.groupExplosion);
+            explosion.animate(x,y,z);
             // this.group.children.splice(i, -1);
             
             // delete this.group.children[i];

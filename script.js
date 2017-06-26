@@ -150,11 +150,8 @@ function updatePlane() {
     spaceShip.mesh.rotation.x = (spaceShip.mesh.position.y - targetY) * 0.05;
     /* var concat = spaceShip.mesh.position.x + spaceShip.mesh.position.y + spaceShip.mesh.position.z;
      console.log('po', Math.round(concat));*/
-     if(particules.collision(spaceShip.mesh)){
-       alert('hi');
-       creatExplosion();
-      explosion.animate(spaceShip.mesh.position.x, spaceShip.mesh.position.y, spaceShip.mesh.position.z);
-   }
+     particules.collision(spaceShip.mesh, spaceShip.mesh.position.x, spaceShip.mesh.position.y, spaceShip.mesh.position.z);
+     
     // contact(spaceShip.mesh.position.x, spaceShip.mesh.position.y, spaceShip.mesh.position.z);
   }, 100);
 
