@@ -1,3 +1,4 @@
+var score = new Score();
 var Explosion = function () {
     var geom = new THREE.TetrahedronGeometry(0.5, 2);
     var mat = new THREE.MeshBasicMaterial({
@@ -26,6 +27,7 @@ Explosion.prototype.animate = function(positionX, positionY, positionZ) {
       TweenMax.to(this.groupExplosion.children[i].position, 0.5, {x:randX, y:randY});  
       TweenMax.to(this.groupExplosion.children[i].scale, 0.5, {x:"0.1", y:"0.1", ease:Power2.easeOut, onComplete: function(){
       scene.remove(that.groupExplosion);
+      score.add();
     }});        
     }
 }

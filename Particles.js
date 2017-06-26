@@ -1,4 +1,4 @@
-var score = new Score();
+
 Particules = function () {
     var geometry = new THREE.TorusGeometry(10, 3, 16, 100);
     var sphere = new THREE.SphereGeometry(0.5, 5, 5);
@@ -57,16 +57,23 @@ Particules.prototype.collision = function (collider, x, y, z) {
         if (this.group.children[i].position.distanceTo(collider.position) <= 1.5) {
             //  this.group.children[i].material.color.setHex(0xf600ff);
             // this.group.children[i].material.color.setHex(0xf600ff);
-            score.add(1);
+            
             this.group.children[i].visible = false;
+            /*if( this.group.children[i].visible === false){
+                
+                return;
+            }*/
             var explosion = new Explosion();
             scene.add(explosion.groupExplosion);
             explosion.animate(x,y,z);
+
+            return;
             // this.group.children.splice(i, -1);
             
             // delete this.group.children[i];
             
         }
+        
         
     }
     /*this.group.children.map(function(x, i, a2){
