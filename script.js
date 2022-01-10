@@ -14,6 +14,7 @@ var tangent = new THREE.Vector3();
 var axis = new THREE.Vector3();
 var up = new THREE.Vector3(0, 1, 0);
 
+
 function getRandom(min, max) {
   return Math.random() * (max - min) + min;
 }
@@ -25,7 +26,7 @@ function createScene() {
   HEIGHT = window.innerHeight;
   camera = new THREE.PerspectiveCamera(45, WIDTH / HEIGHT, 0.1, 1000);
   camera.position.z = 0.25;
-  scene.fog = new THREE.Fog(0x152841, 1, 400);
+  scene.fog = new THREE.Fog(0x152841, 1, 200);
   // do not forget to add antialiasing, cubes looks very bad without it
   renderer = new THREE.WebGLRenderer({
     alpha: true,
@@ -39,8 +40,8 @@ function createScene() {
 }
 
 function createLights() {
-  var hemisphereLight = new THREE.HemisphereLight(0xaaaaaa, 0x000000, .9)
-  var shadowLight = new THREE.PointLight(0x111111, 30);
+  var hemisphereLight = new THREE.HemisphereLight(0xaaaaaa, 0x000000, .3)
+  var shadowLight = new THREE.PointLight(0x111111, 20);
   shadowLight.position.set(1, 3, 3);
   // Allow shadow casting 
   shadowLight.castShadow = true;
@@ -70,6 +71,8 @@ function createParticules() {
   particules = new Particules();
   scene.add(particules.group);
   particules.mesh.scale.set(0.1, 0.1, 0.1);
+
+
 }
 
 function createTunel() {
@@ -86,14 +89,16 @@ var mousePos = {
 function creatExplosion() {
   explosion = new Explosion();
   scene.add(explosion.groupExplosion);
+
 }
 
-function contact(x,y,z){
-   if(particules.collision(spaceShip.mesh)){
-       creatExplosion();
-    explosion.animate(x,y,z);
-   }
-  
+function contact(x, y, z) {
+  if (particules.collision(spaceShip.mesh)) {
+    console.log('hhh')
+    creatExplosion();
+    explosion.animate(x, y, z);
+  }
+
 }
 // now handle the mousemove event
 function handleMouseMove(event) {
@@ -111,18 +116,27 @@ function handleMouseMove(event) {
 
 }
 
-var socket = io.connect('http://172.26.2.185:48080');
-socket.on('message', function (message) {
-  console.log('Le serveur a un message pour vous : ' + message);
-})
+// var socket = io.connect('192.168.1.62:48080');
+// socket.on('message', function (message) {
+//   console.log('Le serveur a un message pour vous : ' + message);
+// })
 var mouve = {
   x: 0,
   y: 0
 };
 function mouveCon() {
-  socket.on('coordo', function (coordo) {
-    x = 1 + coordo.mouveX;
-    y = 1 + coordo.mouveY;
+  // socket.on('coordo', function (coordo) {
+  //   x = 1 + coordo.mouveX;
+  //   y = 1 + coordo.mouveY;
+  //   mouve = {
+  //     x: x,
+  //     y: y
+  //   }
+  // });
+  window.addEventListener("mousemove", (event) => {
+
+    x = (event.clientX - (window.innerWidth / 2)) * 0.01;
+    y = -(event.clientY - (window.innerHeight / 2)) * 0.01;
     mouve = {
       x: x,
       y: y
@@ -140,19 +154,27 @@ function updatePlane() {
     // to achieve that we use a normalize function (see below)	
     /*var targetX = normalize(mousePos.x, -1, 1, -4, 4);
     var targetY = normalize(mousePos.y, -1, 1, -3, 3);*/
-    var targetX = mouve.x / 100;
-    var targetY = mouve.y / 100;
-    // Move the plane at each frame by adding a fraction of the remaining distance
-    spaceShip.mesh.position.y += (targetY - spaceShip.mesh.position.y) * 0.1;
-    spaceShip.mesh.position.x += (targetX - spaceShip.mesh.position.x) * 0.1;
-    // Rotate the plane proportionally to the remaining distance
-    spaceShip.mesh.rotation.z = (targetY - spaceShip.mesh.position.y) * 0.1;
-    spaceShip.mesh.rotation.x = (spaceShip.mesh.position.y - targetY) * 0.05;
-    /* var concat = spaceShip.mesh.position.x + spaceShip.mesh.position.y + spaceShip.mesh.position.z;
-     console.log('po', Math.round(concat));*/
-     particules.collision(spaceShip.mesh, spaceShip.mesh.position.x, spaceShip.mesh.position.y, spaceShip.mesh.position.z);
-     
+    var targetX = mouve.x;
+    var targetY = mouve.y;
+
+    // let ovni = scene.getObjectByName(model.name)
+
+    if (ovni) {
+      // Move the plane at each frame by adding a fraction of the remaining distance
+      ovni.position.y += (targetY - ovni.position.y) * 0.1;
+      ovni.position.x += (targetX - ovni.position.x) * 0.1;
+      // // Rotate the plane proportionally to the remaining distance
+
+      ovni.rotation.z = (targetY - ovni.position.y) * 0.1;
+      ovni.rotation.x = (ovni.position.y - targetY) * 0.05;
+      // /* var concat = spaceShip.mesh.position.x + spaceShip.mesh.position.y + spaceShip.mesh.position.z;
+      //  console.log('po', Math.round(concat));*/
+      particules.collision(ovni, ovni.position.x, ovni.position.y, ovni.position.z);
+    }
+
     // contact(spaceShip.mesh.position.x, spaceShip.mesh.position.y, spaceShip.mesh.position.z);
+
+
   }, 100);
 
 }

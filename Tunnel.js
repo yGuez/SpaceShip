@@ -13,7 +13,7 @@ Tunnel = function () {
     curve = new THREE.CatmullRomCurve3(points);
     // Define the curve type
     // Empty geometry
-    var geometry = new THREE.Geometry();
+    var geometry = new THREE.BufferGeometry();
     // Create vertices based on the curve
     geometry.vertices = curve.getPoints(70);
     // Create a line from the points with a basic line material

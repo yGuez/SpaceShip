@@ -1,4 +1,4 @@
-
+var score = new Score();
 Particules = function () {
     var geometry = new THREE.TorusGeometry(10, 3, 16, 100);
     var sphere = new THREE.SphereGeometry(0.5, 5, 5);
@@ -13,9 +13,8 @@ Particules = function () {
     this.mesh = new THREE.Mesh(geometry, matYellow);
     this.group = new THREE.Group();
     for (var j = 0; j < 100; j++) {
-        var matOrange = new THREE.MeshBasicMaterial({
+        var matOrange = new THREE.MeshToonMaterial({
             color: 0xff8c00,
-            vertexColors: THREE.FaceColors
         })
         this.sphereMesh = new THREE.Mesh(sphere, matOrange);
         /*this.sphereMesh.position.x = Math.random() * 2000 - 1000;
@@ -57,7 +56,7 @@ Particules.prototype.collision = function (collider, x, y, z) {
         if (this.group.children[i].position.distanceTo(collider.position) <= 1.5) {
             //  this.group.children[i].material.color.setHex(0xf600ff);
             // this.group.children[i].material.color.setHex(0xf600ff);
-            
+
             this.group.children[i].visible = false;
             /*if( this.group.children[i].visible === false){
                 
@@ -66,8 +65,8 @@ Particules.prototype.collision = function (collider, x, y, z) {
             var explosion = new Explosion();
             scene.add(explosion.groupExplosion);
             explosion.animate(x,y,z);
-
-            return;
+            score.add(1)
+            break;
             // this.group.children.splice(i, -1);
             
             // delete this.group.children[i];
