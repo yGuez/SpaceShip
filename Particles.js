@@ -4,7 +4,6 @@ Particules = function () {
     var sphere = new THREE.SphereGeometry(0.5, 5, 5);
     var matYellow = new THREE.MeshBasicMaterial({
         color: 0xffb200,
-        vertexColors: THREE.FaceColors
     })
     /*var matOrange = new THREE.MeshBasicMaterial({
       color: 0xff8c00,

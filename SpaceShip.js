@@ -40,39 +40,46 @@ var SpaceShip = function () {
     var materials = [
       new THREE.MeshToonMaterial({
         color: 0xd13a00,
-        vertexColors: THREE.FaceColors
       }),
       new THREE.MeshToonMaterial({
         color: 0x1d274c,
-        vertexColors: THREE.FaceColors
       }),
       new THREE.MeshToonMaterial({
         color: 0x1c494d,
-        vertexColors: THREE.FaceColors
       }),
       new THREE.MeshToonMaterial({
         color: 0xffb200,
-        vertexColors: THREE.FaceColors
       }),
       new THREE.MeshToonMaterial({
         color: 0xffb200,
-        vertexColors: THREE.FaceColors
       })
     ];
     loader.load('/models/ovni-2.8.glb', function (gltf) {
       ovni = gltf.scene;
       ovni.name = 'toto'
       ovni.position.z = -10;
-      // gltf.scene.traverse(function (child) {
-      //   if ((child).isMesh) {
-      //     const m = child
-      //     m.receiveShadow = true
-      //     m.castShadow = true
-      //     m.position.z = -10;
-      //     m.name = 'toto'
+      ovni.material = materials[1];
+      gltf.scene.traverse(function (child) {
+        if ((child).isMesh) {
+          const m = child
+          m.receiveShadow = true
+          m.castShadow = true
+          switch (m.material.name) {
+            case "orange":
+              m.material = materials[0]
+              break;
+            case "bleiu":
+              m.material = materials[1]
+              break; 
+              case "vert":
+              m.material = materials[2]
+              break;
 
-      //   }
-      // })
+            default:
+              break;
+          }
+        }
+      })
       scene.add(ovni)
       // that.mesh = new THREE.Mesh(geometry, materials);
       // that.mesh.castShadow = true;
