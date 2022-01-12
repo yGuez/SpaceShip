@@ -35,7 +35,6 @@ Particules = function () {
         this.posX.push(this.group.children[i].position.x = getRandom(-6, 6));
         this.posZ.push(Math.random() * 1 - 0);
     }
-    console.log('part', this.group.children[2]);
 }
 
 Particules.prototype.move = function () {
@@ -46,33 +45,40 @@ Particules.prototype.move = function () {
     counter += 0.0003;
 }
 
-Particules.prototype.collision = function (collider, x, y, z) {
+Particules.prototype.collision = function (collider, onCollide) {
     var concatPos = collider.position.x + collider.position.y + collider.position.z;
     var colliderMesh = Math.round(concatPos * 100) / 100;
     for (var i = 0; i < this.group.children.length; i++) {
         // var ray =  new THREE.Ray(this.group.children[i].position, new THREE.Vector3(this.group.children[i].position.x, this.group.children[i].position.y, collider.position.z).normalize());
         // var distance = this.group.children[i].position.distanceTo(collider.position);
-        if (this.group.children[i].position.distanceTo(collider.position) <= 1.5) {
+        if (this.group.children[i].position.distanceTo(collider.position) <= 1.2) {
             //  this.group.children[i].material.color.setHex(0xf600ff);
             // this.group.children[i].material.color.setHex(0xf600ff);
+            collide = true
 
-            this.group.children[i].visible = false;
-            /*if( this.group.children[i].visible === false){
-                
-                return;
-            }*/
+            if (this.group.children[i].visible === true) {
+
+                onCollide()
+
+
+            };
+
             var explosion = new Explosion();
             scene.add(explosion.groupExplosion);
-            explosion.animate(x,y,z);
-            score.add(1)
-            break;
+            explosion.animate(ovni.position.x, ovni.position.y, ovni.position.z);
+            this.group.children[i].visible = false;
+
+
+
+
+
             // this.group.children.splice(i, -1);
-            
+
             // delete this.group.children[i];
-            
+
         }
-        
-        
+
+
     }
     /*this.group.children.map(function(x, i, a2){
         if(x.position.distanceTo(collider.position) <= 0.5){

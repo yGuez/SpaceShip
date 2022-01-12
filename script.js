@@ -13,6 +13,10 @@ var counter = 0;
 var tangent = new THREE.Vector3();
 var axis = new THREE.Vector3();
 var up = new THREE.Vector3(0, 1, 0);
+var collide = false
+var deltaTime = 0;
+var newTime = new Date().getTime();
+var oldTime = new Date().getTime();
 
 
 function getRandom(min, max) {
@@ -41,7 +45,8 @@ function createScene() {
 
 function createLights() {
   var hemisphereLight = new THREE.HemisphereLight(0xaaaaaa, 0x000000, .3)
-  var shadowLight = new THREE.PointLight(0x111111, 20);
+  var shadowLight = new THREE.PointLight(0x111111, 21);
+  const sunLight = new THREE.DirectionalLight(0xffffff, 1);
   shadowLight.position.set(1, 3, 3);
   // Allow shadow casting 
   shadowLight.castShadow = true;
@@ -58,6 +63,7 @@ function createLights() {
   // but also the more expensive and less performant
   shadowLight.shadow.mapSize.width = 2048;
   shadowLight.shadow.mapSize.height = 2048;
+
   scene.add(shadowLight);
   scene.add(hemisphereLight);
 }
@@ -146,6 +152,9 @@ function mouveCon() {
 
 
 function updatePlane() {
+  newTime = new Date().getTime();
+  deltaTime = newTime - oldTime;
+  oldTime = newTime;
   // ajout d'un timeOut sinon ça ne marche pas le modèle est pas chargé !
   setTimeout(function () {
     // let's move the spaceShip between -100 and 100 on the horizontal axis, 
@@ -158,18 +167,31 @@ function updatePlane() {
     var targetY = mouve.y;
 
     // let ovni = scene.getObjectByName(model.name)
-
     if (ovni) {
+
+
       // Move the plane at each frame by adding a fraction of the remaining distance
-      ovni.position.y += (targetY - ovni.position.y) * 0.1;
-      ovni.position.x += (targetX - ovni.position.x) * 0.1;
+      ovni.position.y += (targetY - ovni.position.y) * deltaTime * 0.01;
+      ovni.position.x += (targetX - ovni.position.x) * deltaTime * 0.01;
       // // Rotate the plane proportionally to the remaining distance
 
-      ovni.rotation.z = (targetY - ovni.position.y) * 0.1;
-      ovni.rotation.x = (ovni.position.y - targetY) * 0.05;
+      ovni.rotation.x = (ovni.position.y - targetY) * deltaTime * 0.01;
+      ovni.rotation.z = (ovni.position.x - targetX) * deltaTime * 0.01;
       // /* var concat = spaceShip.mesh.position.x + spaceShip.mesh.position.y + spaceShip.mesh.position.z;
       //  console.log('po', Math.round(concat));*/
-      particules.collision(ovni, ovni.position.x, ovni.position.y, ovni.position.z);
+      particules.collision(ovni, () => {
+        console.log('ovni', ovni)
+        // TweenMax.to(ovni.rotation, 1, {x:34, y:0});
+        // ovni.rotation.x += 0.3*deltaTime;
+
+        // ovni.rotation.x = (ovni.position.y - targetY) * deltaTime * 0.005;
+        TweenMax.from(ovni.rotation, 0.5, { x: "0.3", y: "0.3", z: "0", ease: Power2.easeOut });
+        TweenMax.to(ovni.rotation, 0.5, { x: "0", y: "0", z: "0", ease: Power2.easeOut });
+
+        score.add(1)
+
+
+      });
     }
 
     // contact(spaceShip.mesh.position.x, spaceShip.mesh.position.y, spaceShip.mesh.position.z);
